@@ -1,4 +1,9 @@
 import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 
 public class BanList /*extends*/
 {
@@ -9,29 +14,28 @@ public class BanList /*extends*/
         this.bannedWords = bannedWords;
         if(defaultWords)
         {
-            defaultWords();
+            defaultWords(this.bannedWords);
         }
+
+        
         
     }
 
     /**
      * add the list of default baned words
      */
-    public void defaultWords()
+    public void defaultWords(ArrayList<String> bannedWords)
     {
-        bannedWords.add("asshole");
-        bannedWords.add("bitch");
-        bannedWords.add("bullshit");
-        bannedWords.add("crap");
-        bannedWords.add("damn");
-        bannedWords.add("fuck");
-        bannedWords.add("fucking");
-        bannedWords.add("goddamn");
-        bannedWords.add("motherfuck");
-        bannedWords.add("piss");
-        bannedWords.add("pee");
-        bannedWords.add("poo");
-        bannedWords.add("shit");
+        try (Reader myReader = new BufferedReader(new FileReader("badWords.txt"))) {
+
+			String thisLine; 
+			while ((thisLine = ((BufferedReader) myReader).readLine()) != null) {
+                bannedWords.add(thisLine);
+			}
+			System.out.println();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
         
     }
 
@@ -53,23 +57,23 @@ public class BanList /*extends*/
             {
                 //mask
                 System.out.println(post.getUserName() + "'s post contained a bad word");
+                
+
             }
         }
     }
 
     public boolean checkPost(Post post)
     {
-        String[] split = post.getText().split(" ");
+        String notLetters = "^?![A-Za-z]$";
+        //Pattern pattern = Pattern.compile(notLetters);
         for (String badWord : bannedWords) {
-            
-            for (String  splitString : split) {
-                if(splitString.equals(badWord))
-                {
-                    return true;
-                } 
-            }
-            
+            if(post.getText().contains(notLetters + badWord + notLetters))
+            {   
+                return true;
+            } 
         }
+            
         return false;
     }
     
