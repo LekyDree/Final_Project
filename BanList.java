@@ -4,9 +4,35 @@ public class BanList /*extends*/
 {
     ArrayList<String> bannedWords;
     
-    public BanList(ArrayList<String> bannedWords)
+    public BanList(ArrayList<String> bannedWords, boolean defaultWords)
     {
         this.bannedWords = bannedWords;
+        if(defaultWords)
+        {
+            defaultWords();
+        }
+        
+    }
+
+    /**
+     * add the list of default baned words
+     */
+    public void defaultWords()
+    {
+        bannedWords.add("asshole");
+        bannedWords.add("bitch");
+        bannedWords.add("bullshit");
+        bannedWords.add("crap");
+        bannedWords.add("damn");
+        bannedWords.add("fuck");
+        bannedWords.add("fucking");
+        bannedWords.add("goddamn");
+        bannedWords.add("motherfuck");
+        bannedWords.add("piss");
+        bannedWords.add("pee");
+        bannedWords.add("poo");
+        bannedWords.add("shit");
+        
     }
 
 
