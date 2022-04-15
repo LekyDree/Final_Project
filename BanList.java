@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class BanList /*extends*/
 {
@@ -23,6 +25,7 @@ public class BanList /*extends*/
 
     /**
      * add the list of default baned words
+     * @param ArrayList<String> bannedWords
      */
     public void defaultWords(ArrayList<String> bannedWords)
     {
@@ -53,28 +56,34 @@ public class BanList /*extends*/
     {
         for (Post post : posts) 
         {
-            if(checkPost(post))
+            ArrayList<String> checkedWords = checkPost(post);  
+            if(!checkedWords.isEmpty())
             {
                 //mask
-                System.out.println(post.getUserName() + "'s post contained a bad word");
-                
-
+                checkedWords.forEach(badWord -> post.setText((post.getText().replace(badWord, "████"))));
             }
         }
     }
 
-    public boolean checkPost(Post post)
+    /**
+     * Checks the post for banned words and then returns the banned words that were found
+     * @param post
+     * @return ArrayList<String> checkedWords
+     */
+    public ArrayList<String> checkPost(Post post)
     {
-        String notLetters = "^?![A-Za-z]$";
-        //Pattern pattern = Pattern.compile(notLetters);
+        Pattern pattern;
+        ArrayList<String> checkedWords = new ArrayList<>();
+
         for (String badWord : bannedWords) {
-            if(post.getText().contains(notLetters + badWord + notLetters))
-            {   
-                return true;
+            pattern = Pattern.compile("(([^A-Za-z])|^)" + badWord + "(([^A-Za-z])|$)");
+            Matcher matcher = pattern.matcher(post.getText());
+            while (matcher.find())
+            {
+                checkedWords.add(badWord);
             } 
         }
-            
-        return false;
+        return checkedWords;
     }
     
 }

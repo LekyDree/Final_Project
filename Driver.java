@@ -18,6 +18,7 @@ public class Driver {
         BanList bl = new BanList(wordz, true);
         System.out.println("START!!!!!!!!!");
         bl.filterPosts(posts);
+        posts.forEach(post -> System.out.println(post));
 
 
     }
