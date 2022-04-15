@@ -1,3 +1,9 @@
+/**
+ * Final project GUI
+ * @author Ethan Rienzi
+ * @version 1.0
+ */
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -46,16 +52,16 @@ import javafx.stage.Window;
 public class GUI extends Application{
 
 	public static ArrayList<String> words = new ArrayList<>();
-    public static boolean priorityEnabled = false;
     private static String keyWord;
 
 	// Visual elements that must be globally accessible to determine whether they are selected
 	static RadioButton spamButton = new RadioButton("Spam");
 	static RadioButton maskButton = new RadioButton("Mask");
-	static RadioButton priButton = new RadioButton("Priority");
+	static RadioButton sortButton = new RadioButton("Sort");
 	static CheckBox defaultWords = new CheckBox("Disable default words");
 	static CheckBox checkUsers = new CheckBox("Spam Users");
 	static CheckBox checkPosts = new CheckBox("Spam Posts");
+	static boolean keywordEntered = false;
 
 	public static void main(String[] args) {
 		/* static method inherited from Application class that creates
@@ -106,14 +112,14 @@ public class GUI extends Application{
 		spamCont.getChildren().addAll(spamButton, checkUsers, checkPosts);
 
 
-		// Setup priority filter controls
+		// Setup sort filter controls
 		HBox priCont = new HBox(10);
         
-        TextField priorityKeyword = new TextField();
-        priorityKeyword.setVisible(false);
+        TextField sortKeyword = new TextField();
+        sortKeyword.setVisible(false);
 		Label keywordLbl = new Label("Enter a keyword");
 		keywordLbl.setVisible(false);
-		priCont.getChildren().addAll(priButton, priorityKeyword, keywordLbl);
+		priCont.getChildren().addAll(sortButton, sortKeyword, keywordLbl);
 		
 
 
@@ -142,10 +148,10 @@ public class GUI extends Application{
 
 		maskButton.setOnAction(e -> badWord(e, badWords, defaultWords, finish));
 		spamButton.setOnAction(e -> spamBoxes(e, checkUsers, checkPosts));
-        priButton.setOnAction(e -> priorityBox(e, priorityKeyword, keywordLbl));
+        sortButton.setOnAction(e -> sortBox(e, sortKeyword, keywordLbl));
 
 		badWords.setOnKeyPressed(e -> wordsToList(e, badWords, words, badWord));
-        priorityKeyword.setOnKeyPressed(e -> addPriority(e, priorityKeyword, keyWord, keywordLbl));
+        sortKeyword.setOnKeyPressed(e -> addSort(e, sortKeyword, keyWord, keywordLbl));
 
 		finish.setOnAction(e -> hideWordBox(e, finish, defaultWords, badWords));
 	}
@@ -195,30 +201,31 @@ public class GUI extends Application{
 	}
 
 	/**
-	 * Collects keyword to be prioritized
+	 * Collects keyword to be sorted
 	 * @param e
 	 * @param txt
 	 * @param keyword
 	 * @param lbl
 	 * @return
 	 */
-    private String addPriority(KeyEvent e, TextField txt, String keyword, Label lbl) {
+    private String addSort(KeyEvent e, TextField txt, String keyword, Label lbl) {
         
         if (e.getCode().equals(KeyCode.ENTER)) {
             keyWord = txt.getText();
             txt.setVisible(false);
 			lbl.setVisible(false);
+			keywordEntered = true;
         }
         return keyWord;
     }
 
 	/**
-	 * When priority radio button pressed, makes related elements visible
+	 * When sort radio button pressed, makes related elements visible
 	 * @param e
 	 * @param txtField
 	 * @param lbl
 	 */
-    private void priorityBox(ActionEvent e, TextField txtField, Label lbl) {
+    private void sortBox(ActionEvent e, TextField txtField, Label lbl) {
         txtField.setVisible(true);
 		lbl.setVisible(true);
 
@@ -282,7 +289,7 @@ public class GUI extends Application{
 	 * Provides arrayList of custom banned words
 	 * @return words, list of user-entered words to be censored
 	 */
-	private static ArrayList<String> getWords() {
+	public static ArrayList<String> getWords() {
 
 		return words;
 	}
@@ -291,7 +298,7 @@ public class GUI extends Application{
 	 * Returns boolean telling whether spam posts get filtered out or not
 	 * @return spamPosts
 	 */
-	private static boolean getSpamPosts() {
+	public static boolean getSpamPosts() {
 		return checkPosts.isSelected();
 	}
 
@@ -299,7 +306,7 @@ public class GUI extends Application{
 	 * Returns boolean telling whether spam users get filtered out or not
 	 * @return spamUsers
 	 */
-	private static boolean getSpamUsers() {
+	public static boolean getSpamUsers() {
 		return checkUsers.isSelected();
 	}
 
@@ -307,31 +314,31 @@ public class GUI extends Application{
 	 * Returns boolean telling whether or not default words get censored
 	 * @return defaultWords.isSelected()
 	 */
-    private static boolean getDefaultEnabled() {
+    public static boolean getDefaultEnabled() {
         return defaultWords.isSelected();
     }
 
 	/**
-	 * Returns keyword being prioritized
+	 * Returns keyword being sorted
 	 * @return keyWord
 	 */
-    private static String priorityWord() {
+    public static String getSortWord() {
         return keyWord;
     }
 
 	/**
-	 * Returns whether priority filter is enabled
-	 * @return priButton.isSelected(), true if priority button is selected
+	 * Returns whether sort filter is enabled
+	 * @return priButton.isSelected(), true if sort button is selected
 	 */
-	private static boolean isPriorityEnabled() {
-		return priButton.isSelected();
+	public static boolean isSortEnabled() {
+		return keywordEntered;
 	}
 
 	/**
 	 * Returns whether spam filter is enabled
 	 * @return spamButton.isSelected(), true if spam button is selected
 	 */
-	private static boolean isSpamEnabled() {
+	public static boolean isSpamEnabled() {
 		return spamButton.isSelected();
 	}
 
@@ -339,7 +346,7 @@ public class GUI extends Application{
 	 * Returns whether mask filter is enabled
 	 * @return maskButton.isSelected(), true if mask button is selected
 	 */
-	private static boolean isMaskEnabled() {
+	public static boolean isMaskEnabled() {
 		return maskButton.isSelected();
 	}
 }
