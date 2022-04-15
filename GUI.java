@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -182,23 +184,29 @@ public class GUI extends Application{
 	 * @return
 	 */
 	private ArrayList<String> wordsToList(KeyEvent e, TextField textField, ArrayList<String> words, ListView list) {
+		String whiteSpace = "\\s+";
+		Pattern blank = Pattern.compile(whiteSpace);
+
 		if (e.getCode().equals(KeyCode.ENTER) ||
 				e.getCode().equals(KeyCode.TAB)) {
-			
+					if (textField.getText() != "" && !blank.matcher(textField.getText()).matches()) {
+						if (words.contains(textField.getText())) {
+							words.remove(textField.getText());
+							list.getItems().remove(textField.getText());
+						}
+						else {
+							words.add(textField.getText());
+							list.getItems().add(textField.getText());
+						}
+					}
                     if (words.contains(textField.getText())) {
-                        words.remove(textField.getText());
-                        list.getItems().remove(textField.getText());
-                    }
-                    else {
-                        words.add(textField.getText());
-			            list.getItems().add(textField.getText());
-                    }
                     
 			textField.clear();
+			}
 		}
-
 		return words;
 	}
+	
 
 	/**
 	 * Collects keyword to be sorted
@@ -328,9 +336,17 @@ public class GUI extends Application{
 
 	/**
 	 * Returns whether sort filter is enabled
-	 * @return priButton.isSelected(), true if sort button is selected
+	 * @return sortButton.isSelected(), true if sort button is enabled
 	 */
 	public static boolean isSortEnabled() {
+		return sortButton.isSelected();
+	}
+
+	/**
+	 * Returns whether sort keyword has been entered
+	 * @return keywordEntered, true if sort keyword has been entered
+	 */
+	public static boolean isKeywordEntered() {
 		return keywordEntered;
 	}
 
