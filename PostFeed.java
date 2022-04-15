@@ -1,14 +1,18 @@
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.Map;
 
 public class PostFeed {
-    static private LinkedList<Post> allPosts;
+    static private HashMap<Post, Integer> allPosts;
 
 
     static public void addPost(Post p) {
-        allPosts.add(p);
+        allPosts.put(p, p.getText().hashCode());
     }
 
-    static public void addPost(Post p, int index) {
-        allPosts.add(index, p);
+    static public HashMap<Post, Integer> getPostFeed() {
+        return allPosts;
     }
 }
