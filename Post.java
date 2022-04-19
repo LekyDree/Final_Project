@@ -1,4 +1,3 @@
-//Created by Holden
 public class Post
 {
     private String text;
