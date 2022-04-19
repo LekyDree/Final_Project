@@ -3,48 +3,58 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class Spam extends Filter{
     
-    private HashMap<String, Integer> riskyUsers;
-    private HashMap<String, Post> posts;
-    private HashMap<String, Integer> riskyPosts;
+    private HashMap<String, Integer> riskyUsers = new HashMap<>();
+    private HashMap<String, LinkedList<Post>> postsWithSameUser = new HashMap<>();
+    private HashMap<String, LinkedList<Post>> postsWithSameText = new HashMap<>();
+    private int numRepeatsAllowed;
+
+    public Spam(int numRepeatsAllowed) {
+        this.numRepeatsAllowed = numRepeatsAllowed;
+    }
 
     public void filterPosts() {
-        filterPosts(1);
+        LinkedList<Post> posts = PostFeed.getPostFeed();
+        posts.forEach(post -> tooMuch(post));
+        System.out.println(riskyUsers);
+        System.out.println(postsWithSameUser);
+        System.out.println(postsWithSameText);
     }
 
-    public void filterPosts(int numRepeatsAllowed) {
+    private void tooMuch(Post post) {
+        String postUser = post.getUserName();
+        String postText = post.getText();
+        goThroughPosts(postUser, postsWithSameUser.get(postText), post, true);
+        goThroughPosts(postText, postsWithSameText.get(postText), post, false);
+    }
 
-        BiConsumer<Post, Integer> determineRiskLevel = (post, inte) -> {
-            String postText = post.getText();
-            postText.
-            Integer risk = riskyPosts.get(postText);
-            if (risk != null) {
-                tooMuch(numRepeatsAllowed, risk, postText);
-            }
-            else {
-                int postsSize = posts.size();
-                posts.put(postText, post);
-                if (posts.size() == postsSize) {
-                    tooMuch(numRepeatsAllowed, 0, postText); 
+    private void goThroughPosts(String postInfo, LinkedList<Post> posts, Post post, boolean userPassThrough) {
+        if (posts == null) {
+            posts = new LinkedList<>();
+            ((userPassThrough) ? postsWithSameUser : postsWithSameText).put(postInfo, posts);
+        }
+        posts.add(post);
+
+        if (posts.size() > numRepeatsAllowed) {
+            if (userPassThrough){
+                for (Post spamPost : posts) {
+                    //PostFeed.removePost(spamPost);
+                    riskyUsers.put(postInfo, riskyUsers.get(postInfo) + 1);
                 }
             }
-        //};
-
-        HashMap<Post, Integer> posts = PostFeed.getPostFeed();
-        posts.forEach(determineRiskLevel);
-        //Loop through all posts
-        //If a user is a banned user, their post doesn't show
-        //Check their username to see if their spam
-        //Check        
-    }
-
-    public void tooMuch(int numRepeatsAllowed, int risk, String postText) {
-        riskyPosts.put(postText, risk + 1);
-        if (risk + 1 > numRepeatsAllowed) {
-            posts.remove(postText);
+            else {
+                for (Post spamPost : posts) {
+                    //PostFeed.removePost(spamPost);
+                    Integer numSpamPosts = riskyUsers.get(spamPost.getUserName());
+                    riskyUsers.put(spamPost.getUserName(), numSpamPosts == null ? 1 : numSpamPosts + 1);
+                }
+            }
+            
         }
     }
+    
 }

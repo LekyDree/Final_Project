@@ -5,14 +5,18 @@ import java.util.LinkedList;
 import java.util.Map;
 
 public class PostFeed {
-    static private HashMap<Post, Integer> allPosts;
+    static private LinkedList<Post> allPosts = new LinkedList<>();
 
 
     static public void addPost(Post p) {
-        allPosts.put(p, p.getText().hashCode());
+        allPosts.add(p);
     }
 
-    static public HashMap<Post, Integer> getPostFeed() {
+    static public LinkedList<Post> getPostFeed() {
         return allPosts;
+    }
+
+    static public void removePost(Post post) {
+        allPosts.remove(post);
     }
 }
