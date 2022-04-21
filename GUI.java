@@ -5,44 +5,26 @@
  */
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -54,7 +36,7 @@ import javafx.stage.Window;
 public class GUI extends Application{
 
 	public static ArrayList<String> words = new ArrayList<>();
-    private static String keyWord;
+    public static String keyWord;
 
 	// Visual elements that must be globally accessible to determine whether they are selected
 	static RadioButton spamButton = new RadioButton("Spam");
@@ -183,7 +165,7 @@ public class GUI extends Application{
 	 * @param list
 	 * @return
 	 */
-	private ArrayList<String> wordsToList(KeyEvent e, TextField textField, ArrayList<String> words, ListView list) {
+	private void wordsToList(KeyEvent e, TextField textField, ArrayList<String> words, ListView list) {
 		String whiteSpace = "\\s+";
 		Pattern blank = Pattern.compile(whiteSpace);
 
@@ -204,7 +186,6 @@ public class GUI extends Application{
 			textField.clear();
 			}
 		}
-		return words;
 	}
 	
 
@@ -216,7 +197,7 @@ public class GUI extends Application{
 	 * @param lbl
 	 * @return
 	 */
-    private String addSort(KeyEvent e, TextField txt, String keyword, Label lbl) {
+    private void addSort(KeyEvent e, TextField txt, String keyword, Label lbl) {
         
         if (e.getCode().equals(KeyCode.ENTER)) {
             keyWord = txt.getText();
@@ -224,7 +205,6 @@ public class GUI extends Application{
 			lbl.setVisible(false);
 			keywordEntered = true;
         }
-        return keyWord;
     }
 
 	/**
@@ -292,77 +272,4 @@ public class GUI extends Application{
 		stage.show();		
 	}
 
-
-	/**
-	 * Provides arrayList of custom banned words
-	 * @return words, list of user-entered words to be censored
-	 */
-	public static ArrayList<String> getWords() {
-
-		return words;
-	}
-
-	/**
-	 * Returns boolean telling whether spam posts get filtered out or not
-	 * @return spamPosts
-	 */
-	public static boolean getSpamPosts() {
-		return checkPosts.isSelected();
-	}
-
-	/**
-	 * Returns boolean telling whether spam users get filtered out or not
-	 * @return spamUsers
-	 */
-	public static boolean getSpamUsers() {
-		return checkUsers.isSelected();
-	}
-
-	/**
-	 * Returns boolean telling whether or not default words get censored
-	 * @return defaultWords.isSelected()
-	 */
-    public static boolean getDefaultEnabled() {
-        return defaultWords.isSelected();
-    }
-
-	/**
-	 * Returns keyword being sorted
-	 * @return keyWord
-	 */
-    public static String getSortWord() {
-        return keyWord;
-    }
-
-	/**
-	 * Returns whether sort filter is enabled
-	 * @return sortButton.isSelected(), true if sort button is enabled
-	 */
-	public static boolean isSortEnabled() {
-		return sortButton.isSelected();
-	}
-
-	/**
-	 * Returns whether sort keyword has been entered
-	 * @return keywordEntered, true if sort keyword has been entered
-	 */
-	public static boolean isKeywordEntered() {
-		return keywordEntered;
-	}
-
-	/**
-	 * Returns whether spam filter is enabled
-	 * @return spamButton.isSelected(), true if spam button is selected
-	 */
-	public static boolean isSpamEnabled() {
-		return spamButton.isSelected();
-	}
-
-	/**
-	 * Returns whether mask filter is enabled
-	 * @return maskButton.isSelected(), true if mask button is selected
-	 */
-	public static boolean isMaskEnabled() {
-		return maskButton.isSelected();
-	}
 }
