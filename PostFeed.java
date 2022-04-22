@@ -2,6 +2,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class PostFeed {
@@ -18,5 +19,9 @@ public class PostFeed {
 
     static public void removePost(Post post) {
         allPosts.remove(post);
+    }
+
+    static public void removePosts(List<Post> posts) {
+        allPosts.removeAll(posts);
     }
 }

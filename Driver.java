@@ -15,7 +15,7 @@ public class Driver {
         System.out.println(PostFeed.getPostFeed());
 
 
-        Post post1 = new Post("asshole yo", "holden");
+        /* Post post1 = new Post("asshole yo", "holden");
         Post post2 = new Post("yo what is up", "grape");
         Post post3 = new Post("poopee pool shit fucking", "hawkeye");
         Post post4 = new Post("my cum tatstes good :)", "weirdo");
@@ -31,7 +31,7 @@ public class Driver {
         System.out.println("START!!!!!!!!!");
         bl.filterPosts(posts);
         posts.forEach(post -> System.out.println(post));
-
+        */
 
     }
   
