@@ -1,4 +1,6 @@
-public class FormatException extends RuntimeException 
+import java.io.IOException;
+
+public class FormatException extends IOException 
 {
     public FormatException() 
         { } 

@@ -1,33 +1,32 @@
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.List;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.regex.Pattern;
+
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
+
 import java.util.regex.Matcher;
 
 public class BanList extends Filter
 {
-    static ArrayList<String> bannedWords;
-    static LinkedList<Post> postFeed = PostFeed.getPostFeed();
+    private ArrayList<String> bannedWords;
+    private static List<Post> postFeed = PostFeed.getPostFeed();
     
-    public BanList(ArrayList<String> bannedWords, boolean defaultWords)
+    public BanList(boolean defaultWords)
     {
-        this.bannedWords = bannedWords;
-        if(defaultWords)
-        {
-            defaultWords(this.bannedWords);
-        }
-        
+        if(defaultWords) defaultWords();
     }
 
     /**
      * add the list of default baned words
      * @param ArrayList<String> bannedWords
      */
-    public void defaultWords(ArrayList<String> bannedWords)
+    public void defaultWords()
     {
         try (Reader myReader = new BufferedReader(new FileReader("src/badWords.txt"))) {
 
@@ -39,28 +38,15 @@ public class BanList extends Filter
             myReader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-
-        
-    }
-
-
-    public ArrayList<String> getBannedWords() {
-        return this.bannedWords;
-    }
-
-    public void setBannedWords(ArrayList<String> bannedWords) {
-        this.bannedWords = bannedWords;
+		} 
     }
 
     @Override
     public void filterPosts()
     {
-        for (Post post : postFeed) 
-        {
+        for (Post post : postFeed) {
             ArrayList<String> checkedWords = checkPost(post);  
-            if(!checkedWords.isEmpty())
-            {
+            if(!checkedWords.isEmpty()) {
                 //mask
                 checkedWords.forEach(badWord -> post.setText((post.getText().replace(badWord, "----"))));
             }
@@ -87,5 +73,29 @@ public class BanList extends Filter
         }
         return checkedWords;
     }
+
+    /**
+	 * Collects user-entered words to be censored, adds them to arrayList of strings and displays them in list
+	 * If a word is entered twice, it will be removed from the list and collection of strings
+	 * @param e
+	 * @return
+	 */
+	public void wordsToList(TextField badWordsTxt, ListView<String> badWordLst) {
+		String whiteSpace = "\\s+";
+		Pattern blank = Pattern.compile(whiteSpace);
+		if (badWordsTxt.getText() != "" && !blank.matcher(badWordsTxt.getText()).matches()) {
+			if (bannedWords.contains(badWordsTxt.getText())) {
+				bannedWords.remove(badWordsTxt.getText());
+				badWordLst.getItems().remove(badWordsTxt.getText());
+			}
+			else {
+				bannedWords.add(badWordsTxt.getText());
+				badWordLst.getItems().add(badWordsTxt.getText());
+			}
+		}
+        if (bannedWords.contains(badWordsTxt.getText())) {
+			badWordsTxt.clear();
+		}
+	}
     
 }

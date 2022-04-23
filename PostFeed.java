@@ -1,3 +1,4 @@
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -9,12 +10,16 @@ public class PostFeed {
     static private LinkedList<Post> allPosts = new LinkedList<>();
 
 
-    static public void addPost(Post p) {
-        allPosts.add(p);
+    static public void addPost(Post post) {
+        allPosts.add(post);
     }
 
-    static public LinkedList<Post> getPostFeed() {
-        return allPosts;
+    static public void addPosts(int index, List<Post> posts) {
+        allPosts.addAll(index, posts);
+    }
+
+    static public List<Post> getPostFeed() {
+        return Collections.unmodifiableList(allPosts);
     }
 
     static public void removePost(Post post) {

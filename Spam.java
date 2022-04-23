@@ -14,7 +14,7 @@ public class Spam extends Filter{
     
     private HashMap<String, LinkedList<Post>> postsWithSameUser = new HashMap<>();
     private HashMap<String, LinkedList<Post>> postsWithSameText = new HashMap<>();
-    LinkedList<Post> allPosts;
+    List<Post> allPosts;
 
     private int numRepeatsAllowed;
     private boolean deleteSpamUsersEnabled;

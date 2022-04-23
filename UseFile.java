@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
     
 public class UseFile {
     private static String file = "src/input.txt"; //we can use this as a default instruction file
-    private static LinkedList<Post> feed = PostFeed.getPostFeed();
+    private static List<Post> feed = PostFeed.getPostFeed();
 
     public UseFile(String file){
         this.file = file;
@@ -52,18 +52,13 @@ public class UseFile {
                 {
                     throw new FormatException();
                 }
-				
-
 			}
-
             myReader.close();
 			System.out.println();
-		} catch (IOException e) {
+		} 
+        catch (IOException e) {
 			e.printStackTrace();
 		}
-
-        
-	
 	}
 
     public static void editFile()
@@ -81,21 +76,7 @@ public class UseFile {
                 //put a for each here to go through a list of words followed by a lineSeparator in between them
                 //myWriter.write(PostFeed.getPostFeed().toString());
 
-                ArrayList<Filter> filters = new ArrayList<>();
-                for (Filter f : filters) {
-                    Filter filter;
-                    if (Filter.sortActive) {
-                        filter = new Sort();
-                    }
-                    else if (Filter.maskActive) {
-                        filter = new BanList(GUI.words, !GUI.defaultWords.isSelected());
-                        
-                    }
-                    else {
-                        filter = new Spam(1, GUI.checkPosts.isSelected(), GUI.checkUsers.isSelected());
-                    }
-                    filter.filterPosts();
-                }
+                Filters.applyFilters();
 
                 for (Post post : feed) {   
                     myWriter.write(post.toString());
@@ -105,6 +86,8 @@ public class UseFile {
         catch (IOException e) {
 			e.printStackTrace();
 		}
+
+        
     }
 
     public static void makeFile(){
