@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -7,9 +8,10 @@ import java.io.Reader;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-public class BanList /*extends*/
+public class BanList extends Filter
 {
-    ArrayList<String> bannedWords;
+    static ArrayList<String> bannedWords;
+    static LinkedList<Post> postFeed = PostFeed.getPostFeed();
     
     public BanList(ArrayList<String> bannedWords, boolean defaultWords)
     {
@@ -18,8 +20,6 @@ public class BanList /*extends*/
         {
             defaultWords(this.bannedWords);
         }
-
-        
         
     }
 
@@ -29,16 +29,18 @@ public class BanList /*extends*/
      */
     public void defaultWords(ArrayList<String> bannedWords)
     {
-        try (Reader myReader = new BufferedReader(new FileReader("badWords.txt"))) {
+        try (Reader myReader = new BufferedReader(new FileReader("src/badWords.txt"))) {
 
 			String thisLine; 
 			while ((thisLine = ((BufferedReader) myReader).readLine()) != null) {
                 bannedWords.add(thisLine);
 			}
 			System.out.println();
+            myReader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
         
     }
 
@@ -51,16 +53,16 @@ public class BanList /*extends*/
         this.bannedWords = bannedWords;
     }
 
-    //@oveerride
-    public void filterPosts(ArrayList<Post> posts)
+    @Override
+    public void filterPosts()
     {
-        for (Post post : posts) 
+        for (Post post : postFeed) 
         {
             ArrayList<String> checkedWords = checkPost(post);  
             if(!checkedWords.isEmpty())
             {
                 //mask
-                checkedWords.forEach(badWord -> post.setText((post.getText().replace(badWord, "████"))));
+                checkedWords.forEach(badWord -> post.setText((post.getText().replace(badWord, "----"))));
             }
         }
     }

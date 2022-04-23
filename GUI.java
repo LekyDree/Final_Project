@@ -4,8 +4,11 @@
  * @version 1.0
  */
 
+import java.io.File;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.ArrayList;
-
+import java.util.List;
 import java.util.regex.Pattern;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -25,18 +28,19 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-/**
- *  Demonstration of various controls
- */
 
 
 public class GUI extends Application{
+	final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
 
 	public static ArrayList<String> words = new ArrayList<>();
     public static String keyWord;
+	public static String address;
 
 	// Visual elements that must be globally accessible to determine whether they are selected
 	static RadioButton spamButton = new RadioButton("Spam");
@@ -50,18 +54,24 @@ public class GUI extends Application{
 	public static void main(String[] args) {
 		/* static method inherited from Application class that creates
 		 * an instance of the Application class and starts the JavaFX lifecycle. */
+		
 		launch(args);
 	}
 
 	@Override public void start(Stage mainStage) throws InterruptedException {
 		
 		BorderPane mainPane = new BorderPane();     // make layout to hold controls
-		setupControls(mainPane);  // initialize and place controls
+		setupControls(mainPane, mainStage);  // initialize and place controls
 		Scene scene = new Scene(mainPane);	        // Setup a Splash Screen
 		setStage(mainStage, scene);                 // Finalize and show the stage
 	}
 
-	private void setupControls(BorderPane mainPane) {
+	private void setupControls(BorderPane mainPane, Stage mainStage) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+		
+		
 		// Create labels
 
 		Label filters = new Label("Filters:");
@@ -76,7 +86,13 @@ public class GUI extends Application{
 
 		Button finish = new Button ("Done");
 		finish.setVisible(false);
-		
+
+		Button apply = new Button("Apply");
+
+		Button fileSelect = new Button("Select File");
+
+		Label chosenFile = new Label();
+		chosenFile.setVisible(false);
 		
 		TextField badWords = new TextField();
 		badWords.setVisible(false);
@@ -86,7 +102,7 @@ public class GUI extends Application{
 		maskCont.getChildren().addAll(maskButton, badWords, defaultWords, finish);
 		
 
-
+		
 		// Setup spam filter controls
 		HBox spamCont = new HBox(10);
 		checkUsers.setVisible(false);
@@ -113,14 +129,19 @@ public class GUI extends Application{
 		badWord.setOrientation(Orientation.VERTICAL);
         badWord.setPrefWidth(350);
 		badWord.setPrefHeight(200);
+		badWord.setVisible(false);
 
-		textAreas.getChildren().addAll(badWord);
+		textAreas.getChildren().addAll(badWord, apply);
 		textAreas.setPadding(new Insets(20,0,0,0));
 
 		VBox otherControls = new VBox(80);
 		VBox top = new VBox(10);
+		HBox fileControls = new HBox(10);
+		fileControls.setPadding(new Insets(0, 0, 0, 120));
+		fileControls.getChildren().setAll(fileSelect, chosenFile);
+
 		top.setPadding(new Insets(10, 10, 10, 10));
-		top.getChildren().addAll(filters, spamCont, maskCont, priCont, sep1);
+		top.getChildren().addAll(fileControls, filters, spamCont, maskCont, priCont, sep1);
 
 
 		mainPane.setPadding(new Insets(20,20,20,20));
@@ -130,7 +151,7 @@ public class GUI extends Application{
 
 		// Setup listeners
 
-		maskButton.setOnAction(e -> badWord(e, badWords, defaultWords, finish));
+		maskButton.setOnAction(e -> badWord(e, badWords, defaultWords, finish, badWord));
 		spamButton.setOnAction(e -> spamBoxes(e, checkUsers, checkPosts));
         sortButton.setOnAction(e -> sortBox(e, sortKeyword, keywordLbl));
 
@@ -138,6 +159,19 @@ public class GUI extends Application{
         sortKeyword.setOnKeyPressed(e -> addSort(e, sortKeyword, keyWord, keywordLbl));
 
 		finish.setOnAction(e -> hideWordBox(e, finish, defaultWords, badWords));
+
+		apply.setOnAction(e -> {
+			
+			});
+
+		fileSelect.setOnAction(e -> {
+			File selectedFile = fileChooser.showOpenDialog(mainStage);
+			address = selectedFile.getAbsolutePath(); //added so we can work with the address
+
+			
+			chosenFile.setText(selectedFile.getName());
+			chosenFile.setVisible(true);
+		});
 	}
 
 	
@@ -148,11 +182,14 @@ public class GUI extends Application{
 	 * @param def
 	 * @param btn
 	 */
-	private void badWord(ActionEvent e, TextField bw, CheckBox def, Button btn) {
+	private void badWord(ActionEvent e, TextField bw, CheckBox def, Button btn, ListView list) {
 
 		bw.setVisible(true);;
 		btn.setVisible(true);
         def.setVisible(true);
+		list.setVisible(true);
+
+		logger.log(Level.INFO, "MASKING ENABLED");
 		
 	}
 	
@@ -217,6 +254,8 @@ public class GUI extends Application{
         txtField.setVisible(true);
 		lbl.setVisible(true);
 
+		logger.log(Level.INFO, "SORTING ENABLED");
+
     }
 
 
@@ -259,7 +298,10 @@ public class GUI extends Application{
 		cb1.setVisible(true);
 		cb2.setVisible(true);
 
+		logger.log(Level.INFO, "SPAM FILTER ENABLED");
+
 	}
+
 
 	/**
 	 * Shows GUI
@@ -272,4 +314,14 @@ public class GUI extends Application{
 		stage.show();		
 	}
 
+	public static String getAddress() {
+		if (address != null) {
+			return address;
+		}
+		return "src/instructions.txt";
+	}
+
+	//public List<Filter> getFilters() {
+		
+	//}
 }

@@ -1,38 +1,42 @@
+import java.security.KeyStore.Entry;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class Spam extends Filter{
     
-    private HashMap<String, Integer> riskyUsers = new HashMap<>();
     private HashMap<String, LinkedList<Post>> postsWithSameUser = new HashMap<>();
     private HashMap<String, LinkedList<Post>> postsWithSameText = new HashMap<>();
-
-    LinkedList<Post> postsToRemove;
+    LinkedList<Post> allPosts;
 
     private int numRepeatsAllowed;
+    private boolean deleteSpamUsersEnabled;
+    private boolean deleteSpamTextEnabled;
 
-    public Spam(int numRepeatsAllowed) {
+    public Spam(int numRepeatsAllowed, boolean deleteSpamTextEnabled, boolean deleteSpamUsersEnabled) {
         this.numRepeatsAllowed = numRepeatsAllowed;
+        this.deleteSpamTextEnabled = deleteSpamTextEnabled;
+        this.deleteSpamUsersEnabled = deleteSpamUsersEnabled;
     }
 
     public void filterPosts() {
-        postsToRemove = new LinkedList<>();
-        LinkedList<Post> posts = PostFeed.getPostFeed();
-        posts.forEach(post -> tooMuch(post));
-        PostFeed.removePosts(postsToRemove);
+        allPosts = PostFeed.getPostFeed();
+        allPosts.forEach(post -> collectSpam(post));
+        if (deleteSpamTextEnabled) deleteSpamText();
+        if (deleteSpamUsersEnabled) deleteSpamUsers();
 
-        System.out.println(postsWithSameText);
         System.out.println(postsWithSameUser);
-        System.out.println(riskyUsers);
+        System.out.println(postsWithSameText);
     }
 
-    private void tooMuch(Post post) {
+    private void collectSpam(Post post) {
         String postUser = post.getUserName();
         String postText = post.getText();
         goThroughPosts(postUser, postsWithSameUser.get(postUser), post, true);
@@ -43,26 +47,24 @@ public class Spam extends Filter{
         if (posts == null) {
             posts = new LinkedList<>();
             ((userPassThrough) ? postsWithSameUser : postsWithSameText).put(postInfo, posts);
-            System.out.println(postInfo);
         }
-        posts.add(post);
+        posts.add(post);        
+    }
 
-        if (posts.size() > numRepeatsAllowed) {
-            Iterator it = posts.iterator();
-            if (userPassThrough){
-                while (it.hasNext())
-                    //postsToRemove.add(spamPost);
-                    riskyUsers.put(postInfo, riskyUsers.get(postInfo) + 1);
-                }
+    private void deleteSpamText() {
+        for (LinkedList<Post> posts : postsWithSameText.values()) {
+            if (posts.size() > numRepeatsAllowed) {
+                PostFeed.removePosts(posts);
             }
-            else {
-                for (Post spamPost : posts) {
-                    postsToRemove.add(spamPost);
-                    Integer numSpamPosts = riskyUsers.get(spamPost.getUserName());
-                    riskyUsers.put(spamPost.getUserName(), numSpamPosts == null ? 1 : numSpamPosts + 1);
-                }
-            }
-            
         }
     }
 
+    private void deleteSpamUsers() {
+        postsWithSameUser.forEach((user, posts) -> {
+            Collection<List<Post>> posteys = posts.stream().collect(Collectors.groupingBy(Post::getText)).values();
+            if (posteys.stream().max((posts1, posts2) -> posts1.size() - posts2.size()).get().size() > numRepeatsAllowed) {
+                PostFeed.removePosts(posts);
+            }
+        });
+    }
+}

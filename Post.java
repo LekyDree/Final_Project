@@ -2,6 +2,7 @@ public class Post
 {
     private String text;
     private String userName;
+    Boolean sorted = false;
 
     /**
      * initialies Post
@@ -37,7 +38,7 @@ public class Post
      */
     public String toString()
     {
-        return userName + ": " + text;
+        return userName + text;
     }
 
 
