@@ -1,2 +1,0 @@
-use the file io to open the correct file using the gui. You can then open it and choose which changes are applied to it. When done, you can write it back into the file, 
-or choose to create a new file which stores this
