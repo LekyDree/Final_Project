@@ -23,6 +23,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -38,29 +39,22 @@ import javafx.stage.Window;
 public class GUI extends Application{
 	final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-	public static String address;
+	private static String address;
 
 	// Visual elements that must be globally accessible to determine whether they are selected
-	static RadioButton spamButton = new RadioButton("Spam");
-	static RadioButton maskButton = new RadioButton("Mask");
-	static RadioButton sortButton = new RadioButton("Sort");
-	static ToggleGroup filterToggleGroup = new ToggleGroup();
-	static CheckBox defaultWordsCheck = new CheckBox("Disable default words");
-	static CheckBox usersCheck = new CheckBox("Spam Users");
-	static CheckBox postsCheck = new CheckBox("Spam Posts");
+	private static RadioButton spamButton = new RadioButton("Spam");
+	private static RadioButton maskButton = new RadioButton("Mask");
+	private static RadioButton sortButton = new RadioButton("Sort");
+	private static ToggleGroup filterToggleGroup = new ToggleGroup();
+	private static CheckBox defaultWordsCheck = new CheckBox("Disable default words");
+	private static CheckBox usersCheck = new CheckBox("Spam Users");
+	private static CheckBox postsCheck = new CheckBox("Spam Posts");
 
-	TextField badWordsTxt = new TextField();
-	ListView<String> badWordLst = new ListView<String>();
-	TextField sortKeywordTxt = new TextField();
-	Label keywordLbl = new Label("Enter a keyword");
-	Button apply = new Button("Apply");
-
-	public static void main(String[] args) {
-		/* static method inherited from Application class that creates
-		 * an instance of the Application class and starts the JavaFX lifecycle. */
-		
-		launch(args);
-	}
+	private static TextField badWordsTxt = new TextField();
+	private static ListView<String> badWordLst = new ListView<String>();
+	private static TextField sortKeywordTxt = new TextField();
+	private static Label keywordLbl = new Label("Enter a keyword");
+	private static Button apply = new Button("Apply");
 
 	@Override public void start(Stage mainStage) throws InterruptedException {
 		
@@ -98,7 +92,7 @@ public class GUI extends Application{
 		badWordsTxt.setVisible(false);
 		defaultWordsCheck.setVisible(false);
 
-		maskCont.setPadding(new Insets(10, 0, 0, 0));
+		maskCont.setPadding(new Insets(2, 0, 0, 0));
 		maskCont.getChildren().addAll(maskButton, badWordsTxt, defaultWordsCheck);
 		
 
@@ -117,6 +111,8 @@ public class GUI extends Application{
         
         sortKeywordTxt.setVisible(false);
 		keywordLbl.setVisible(false);
+
+		priCont.setPadding(new Insets(10, 0, 0, 0));
 		priCont.getChildren().addAll(sortButton, sortKeywordTxt, keywordLbl);
 		
 
@@ -138,7 +134,7 @@ public class GUI extends Application{
 		fileControls.getChildren().setAll(fileSelect, chosenFile);
 
 		top.setPadding(new Insets(10, 10, 10, 10));
-		top.getChildren().addAll(fileControls, filters, spamCont, maskCont, priCont, sep1);
+		top.getChildren().addAll(fileControls, filters, spamCont, priCont, maskCont, sep1);
 
 		mainPane.setPadding(new Insets(20,20,20,20));
 		mainPane.setTop(top);
@@ -149,21 +145,29 @@ public class GUI extends Application{
 		spamButton.setToggleGroup(filterToggleGroup);
 		sortButton.setToggleGroup(filterToggleGroup);
 
+		filterToggleGroup.selectedToggleProperty().addListener((change, oldRadioButton, newRadioButton) -> {
+			toggleFilterSettings(oldRadioButton, false);
+		});
+
 		maskButton.setOnAction(e -> {
-			clearPopups();
-			badWord();
+			apply.setVisible(true);
+			toggleMaskSettings(true);
 		});
+
 		spamButton.setOnAction(e -> {
-			clearPopups();
-			spamBoxes();
+			apply.setVisible(true);
+			toggleSpamSettings(true);
 		});
-        sortButton.setOnAction(e -> {
-			clearPopups();
-			sortBox();
+
+		sortButton.setOnAction(e -> {
+			apply.setVisible(true);
+			toggleSortSettings(true);
 		});
 
 		apply.setOnAction(e -> {
-			clearPopups();
+			toggleMaskSettings(false);
+			toggleSpamSettings(false);
+			toggleSortSettings(false);
 			apply.setVisible(false);
 			createFilter();
 		});
@@ -178,46 +182,38 @@ public class GUI extends Application{
 		});
 	}
 
-	/**
-	 * When mask radiobutton enabled, makes corresponding elements visible to user
-	 */
-	private void badWord() {
-		badWordsTxt.setVisible(true);
-        defaultWordsCheck.setVisible(true);
-		badWordLst.setVisible(true);
 
-		logger.log(Level.INFO, "MASKING ENABLED");
+	private void toggleFilterSettings(Toggle button, boolean toggleOn) {
+		if (button.equals(maskButton)) {
+			toggleMaskSettings(toggleOn);
+		}
+		else if (button.equals(spamButton)) {
+			toggleSpamSettings(toggleOn);
+		}
+		else if (button.equals(sortButton)) {
+			toggleSortSettings(toggleOn);
+		}
 	}
 
-	/**
-	 * When sort radio button pressed, makes related elements visible
-	 */
-    private void sortBox() {
-        sortKeywordTxt.setVisible(true);
-		keywordLbl.setVisible(true);
-
-		logger.log(Level.INFO, "SORTING ENABLED");
-    }
-
-	/**
-	 * When spam radiobutton enabled, makes corresponding elements visible to user
-	 */
-	private void spamBoxes() {
-		postsCheck.setVisible(true);
-		usersCheck.setVisible(true);
-
-		logger.log(Level.INFO, "SPAM FILTER ENABLED");
+	private void toggleMaskSettings(boolean toggleOn) {
+		badWordsTxt.setVisible(toggleOn);
+        defaultWordsCheck.setVisible(toggleOn);
+		badWordLst.setVisible(toggleOn);
+		if (toggleOn) logger.log(Level.INFO, "MASKING ENABLED");
 	}
 
-	private void clearPopups() {
-		apply.setVisible(true);
-		postsCheck.setVisible(false);
-		usersCheck.setVisible(false);
-		defaultWordsCheck.setVisible(false);
-        badWordsTxt.setVisible(false);
-		sortKeywordTxt.setVisible(false);
-		keywordLbl.setVisible(false);
+	private void toggleSpamSettings(boolean toggleOn) {
+		postsCheck.setVisible(toggleOn);
+		usersCheck.setVisible(toggleOn);
+		if (toggleOn) logger.log(Level.INFO, "SPAM FILTER ENABLED");
 	}
+
+	private void toggleSortSettings(boolean toggleOn) {
+		sortKeywordTxt.setVisible(toggleOn);
+		keywordLbl.setVisible(toggleOn);
+		if (toggleOn) logger.log(Level.INFO, "SORTING ENABLED");
+	}
+
 
 	private void createFilter() {
 		Filter filter;
@@ -254,8 +250,4 @@ public class GUI extends Application{
 		}
 		return "src/instructions.txt";
 	}
-
-	//public List<Filter> getFilters() {
-		
-	//}
 }

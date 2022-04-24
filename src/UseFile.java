@@ -86,12 +86,9 @@ public class UseFile {
         catch (IOException e) {
 			e.printStackTrace();
 		}
-
-        
     }
 
     public static void makeFile(){
-
         try {
             File myObj = new File("src/output.txt");
             if (myObj.createNewFile()) {
@@ -106,7 +103,5 @@ public class UseFile {
             e.printStackTrace();
           }
     }
-    
-
 }
 

@@ -1,24 +1,21 @@
-import java.security.KeyStore.Entry;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class Spam extends Filter{
+public class Spam extends Filter implements FeedChanger{
     
     private HashMap<String, LinkedList<Post>> postsWithSameUser = new HashMap<>();
     private HashMap<String, LinkedList<Post>> postsWithSameText = new HashMap<>();
-    List<Post> allPosts;
 
     private int numRepeatsAllowed;
     private boolean deleteSpamUsersEnabled;
     private boolean deleteSpamTextEnabled;
+
+    HashSet<Post> postsToRemove = new HashSet<>();
 
     public Spam(int numRepeatsAllowed, boolean deleteSpamTextEnabled, boolean deleteSpamUsersEnabled) {
         this.numRepeatsAllowed = numRepeatsAllowed;
@@ -27,13 +24,9 @@ public class Spam extends Filter{
     }
 
     public void filterPosts() {
-        allPosts = PostFeed.getPostFeed();
-        allPosts.forEach(post -> collectSpam(post));
+        postFeed.forEach(post -> collectSpam(post));
         if (deleteSpamTextEnabled) deleteSpamText();
         if (deleteSpamUsersEnabled) deleteSpamUsers();
-
-        System.out.println(postsWithSameUser);
-        System.out.println(postsWithSameText);
     }
 
     private void collectSpam(Post post) {
@@ -54,17 +47,23 @@ public class Spam extends Filter{
     private void deleteSpamText() {
         for (LinkedList<Post> posts : postsWithSameText.values()) {
             if (posts.size() > numRepeatsAllowed) {
-                PostFeed.removePosts(posts);
+                postsToRemove.addAll(posts);
             }
         }
     }
 
     private void deleteSpamUsers() {
+        Comparator<List<Post>> higherRepeat = (posts1, posts2) -> posts1.size() - posts2.size();
+
         postsWithSameUser.forEach((user, posts) -> {
-            Collection<List<Post>> posteys = posts.stream().collect(Collectors.groupingBy(Post::getText)).values();
-            if (posteys.stream().max((posts1, posts2) -> posts1.size() - posts2.size()).get().size() > numRepeatsAllowed) {
-                PostFeed.removePosts(posts);
+            Collection<List<Post>> userPostRepeats = posts.stream().collect(Collectors.groupingBy(Post::getText)).values();
+            if (userPostRepeats.stream().max(higherRepeat).get().size() > numRepeatsAllowed) {
+                postsToRemove.addAll(posts);
             }
         });
+    }
+
+    public void changeFeed() {
+        PostFeed.removePosts(postsToRemove);
     }
 }

@@ -1,10 +1,7 @@
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class PostFeed {
     static private LinkedList<Post> allPosts = new LinkedList<>();
@@ -26,7 +23,7 @@ public class PostFeed {
         allPosts.remove(post);
     }
 
-    static public void removePosts(List<Post> posts) {
+    static public void removePosts(Collection<Post> posts) {
         allPosts.removeAll(posts);
     }
 }

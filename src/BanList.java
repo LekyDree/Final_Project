@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.List;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -8,15 +7,13 @@ import java.util.regex.Pattern;
 
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyEvent;
 
 import java.util.regex.Matcher;
 
 public class BanList extends Filter
 {
-    private ArrayList<String> bannedWords;
-    private static List<Post> postFeed = PostFeed.getPostFeed();
-    
+    private ArrayList<String> bannedWords = new ArrayList<>();
+        
     public BanList(boolean defaultWords)
     {
         if(defaultWords) defaultWords();
@@ -36,7 +33,7 @@ public class BanList extends Filter
 			}
 			System.out.println();
             myReader.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		} 
     }
