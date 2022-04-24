@@ -14,6 +14,7 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -25,6 +26,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
@@ -55,6 +57,10 @@ public class GUI extends Application{
 	private static TextField sortKeywordTxt = new TextField();
 	private static Label keywordLbl = new Label("Enter a keyword");
 	private static Button apply = new Button("Apply");
+	private static Button loadButton = new Button("Load Preferences");
+	private static Button saveButton = new Button("Save Preferences");
+	private static TextField loadTxt = new TextField();
+	private static TextField saveTxt = new TextField();
 
 	@Override public void start(Stage mainStage) throws InterruptedException {
 		
@@ -129,12 +135,28 @@ public class GUI extends Application{
 
 		VBox otherControls = new VBox(80);
 		VBox top = new VBox(10);
-		HBox fileControls = new HBox(10);
-		fileControls.setPadding(new Insets(0, 0, 0, 120));
+		HBox fileControls = new HBox(30);
 		fileControls.getChildren().setAll(fileSelect, chosenFile);
+		fileControls.setAlignment(Pos.TOP_CENTER);
+
+		HBox saveAndLoadArea = new HBox(10);
+		VBox saveArea = new VBox(10);
+		saveTxt.setTooltip(new Tooltip("Enter a name for your filter selections"));
+		saveTxt.setVisible(false);
+		saveArea.getChildren().addAll(saveButton, saveTxt);
+		saveArea.setAlignment(Pos.CENTER);
+
+		VBox loadArea = new VBox(10);
+		loadTxt.setTooltip(new Tooltip("Enter the name for you entered for the filter selections"));
+		loadTxt.setVisible(false);
+		loadArea.getChildren().addAll(loadButton, loadTxt);
+		loadArea.setAlignment(Pos.CENTER);
+
+		saveAndLoadArea.getChildren().addAll(saveArea, loadArea);
+		saveAndLoadArea.setAlignment(Pos.CENTER);
 
 		top.setPadding(new Insets(10, 10, 10, 10));
-		top.getChildren().addAll(fileControls, filters, spamCont, priCont, maskCont, sep1);
+		top.getChildren().addAll(fileControls, saveAndLoadArea, filters, spamCont, priCont, maskCont, sep1);
 
 		mainPane.setPadding(new Insets(20,20,20,20));
 		mainPane.setTop(top);
@@ -146,7 +168,9 @@ public class GUI extends Application{
 		sortButton.setToggleGroup(filterToggleGroup);
 
 		filterToggleGroup.selectedToggleProperty().addListener((change, oldRadioButton, newRadioButton) -> {
-			toggleFilterSettings(oldRadioButton, false);
+			if (oldRadioButton != null) {
+				toggleFilterSettings(oldRadioButton, false);
+			}
 		});
 
 		maskButton.setOnAction(e -> {
@@ -175,10 +199,30 @@ public class GUI extends Application{
 		fileSelect.setOnAction(e -> {
 			File selectedFile = fileChooser.showOpenDialog(mainStage);
 			address = selectedFile.getAbsolutePath(); //added so we can work with the address
-
-			
 			chosenFile.setText(selectedFile.getName());
 			chosenFile.setVisible(true);
+		});
+
+		saveButton.setOnAction(e -> {
+			saveTxt.setVisible(true);
+		});
+
+		loadButton.setOnAction(e -> {
+			loadTxt.setVisible(true);
+		});
+
+		saveTxt.setOnKeyPressed(e -> {
+			if (e.getCode() == KeyCode.ENTER) {
+				FiltersSerialization.serializeFilters(saveTxt.getText());
+				saveTxt.setVisible(false);
+			}
+		});
+
+		loadTxt.setOnKeyPressed(e -> {
+			if (e.getCode() == KeyCode.ENTER) {
+				FiltersSerialization.deserializeFilters(loadTxt.getText());
+				loadTxt.setVisible(false);
+			}
 		});
 	}
 

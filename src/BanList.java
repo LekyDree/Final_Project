@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.Reader;
+import java.io.Serializable;
 import java.util.regex.Pattern;
 
 import javafx.scene.control.ListView;
@@ -10,8 +10,10 @@ import javafx.scene.control.TextField;
 
 import java.util.regex.Matcher;
 
-public class BanList extends Filter
+public class BanList extends Filter implements Serializable
 {
+    private static final long serialVersionUID = 43892023963089865L;
+
     private ArrayList<String> bannedWords = new ArrayList<>();
         
     public BanList(boolean defaultWords)

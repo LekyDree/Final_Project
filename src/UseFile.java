@@ -45,7 +45,6 @@ public class UseFile {
                     String userName = thisLine.substring(0, colIndex);
                     String postText = thisLine.substring(colIndex);
                     Post currPost = new Post(postText, userName);
-
                     PostFeed.addPost(currPost);
                 }
                 else
@@ -53,7 +52,6 @@ public class UseFile {
                     throw new FormatException();
                 }
 			}
-            myReader.close();
 			System.out.println();
 		} 
         catch (IOException e) {

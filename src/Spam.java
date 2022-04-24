@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -6,16 +7,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Spam extends Filter implements FeedChanger{
+public class Spam extends Filter implements FeedChanger, Serializable{
     
-    private HashMap<String, LinkedList<Post>> postsWithSameUser = new HashMap<>();
-    private HashMap<String, LinkedList<Post>> postsWithSameText = new HashMap<>();
+    private static final long serialVersionUID = 98024176423187L;
+
+    private transient HashMap<String, LinkedList<Post>> postsWithSameUser = new HashMap<>();
+    private transient HashMap<String, LinkedList<Post>> postsWithSameText = new HashMap<>();
 
     private int numRepeatsAllowed;
     private boolean deleteSpamUsersEnabled;
     private boolean deleteSpamTextEnabled;
 
-    HashSet<Post> postsToRemove = new HashSet<>();
+    private transient HashSet<Post> postsToRemove = new HashSet<>();
 
     public Spam(int numRepeatsAllowed, boolean deleteSpamTextEnabled, boolean deleteSpamUsersEnabled) {
         this.numRepeatsAllowed = numRepeatsAllowed;
@@ -24,6 +27,9 @@ public class Spam extends Filter implements FeedChanger{
     }
 
     public void filterPosts() {
+        postsWithSameText = new HashMap<>();
+        postsWithSameUser = new HashMap<>();
+        postsToRemove = new HashSet<>();
         postFeed.forEach(post -> collectSpam(post));
         if (deleteSpamTextEnabled) deleteSpamText();
         if (deleteSpamUsersEnabled) deleteSpamUsers();
