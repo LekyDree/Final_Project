@@ -23,7 +23,6 @@ public class BanList extends Filter implements Serializable
     {
         if(defaultWords) defaultWords();
         bannedWords.addAll(words);
-        System.out.println(bannedWords);
     }
 
     /**
@@ -75,14 +74,14 @@ public class BanList extends Filter implements Serializable
         ArrayList<String> checkedWords = new ArrayList<>();
 
         for (String badWord : bannedWords) {
+            
             pattern = Pattern.compile("(([^A-Za-z])|^)" + badWord + "(([^A-Za-z])|$)");
             matcher = pattern.matcher(post.getText().toLowerCase());
             while (matcher.find())
-            {
-                checkedWords.add(matcher.group().strip());
+            {                
+                checkedWords.add(post.getText().substring(matcher.start(), matcher.end()).strip());
             } 
         }
-        System.out.println(checkedWords);
         return checkedWords;
     }
 }

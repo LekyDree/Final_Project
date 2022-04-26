@@ -88,7 +88,6 @@ public class Spam extends Filter implements FeedChanger, Serializable{
     */
     private void deleteSpamUsers() {
         Comparator<List<Post>> higherRepeat = (posts1, posts2) -> posts1.size() - posts2.size();
-
         postsWithSameUser.forEach((user, posts) -> {
             Collection<List<Post>> userPostRepeats = posts.stream().collect(Collectors.groupingBy(Post::getText)).values();
             if (userPostRepeats.stream().max(higherRepeat).get().size() > numRepeatsAllowed) {
