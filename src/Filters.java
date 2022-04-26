@@ -1,65 +1,74 @@
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+* Holds collection of filters, which can be acted upon
+* @author Kyle Reed
+* @version 1.0
+*/
 public class Filters implements Serializable {
     
     private static final long serialVersionUID = 890247967106502984L;
     
-    private static LinkedList<Filter> filtersFC = new LinkedList<>();
-    private static LinkedList<Filter> filtersNotFC = new LinkedList<>();
-
-    private LinkedList<Filter> filtersFCSave = new LinkedList<>();
-    private LinkedList<Filter> filtersNotFCSave = new LinkedList<>();
+    private static LinkedList<Filter> filters = new LinkedList<>();
+    private LinkedList<Filter> filtersSave = new LinkedList<>();
 
     public Filters() {
-        filtersFCSave = filtersFC;
-        filtersNotFCSave = filtersNotFC;
+        filtersSave = filters;
     }
 
+    /**
+    * adds a filter to filters
+    * @param Filter filter
+    */
     public static void addFilter(Filter filter) {
-        if (filter instanceof FeedChanger) {
-            filtersFC.add(filter);
-        }
-        else {
-            filtersNotFC.add(filter);
-        }
+        filters.add(filter);
     }
 
+    /**
+    * goes through and apply the filters to the posts
+    */
     public static void applyFilters() {
         ExecutorService executor = Executors.newCachedThreadPool();
-        CountDownLatch latch = new CountDownLatch(filtersFC.size());
+        CountDownLatch latch = new CountDownLatch(filters.size());
 
-        filtersFC.forEach((filter) -> {
-            Runnable filtering = () -> {
-                filter.filterPosts();
+        filters.forEach((filter) -> {
+            if (filter instanceof FeedChanger) {
+                Runnable filtering = () -> {
+                    ((FeedChanger)filter).determineFeedAlteration();
+                    latch.countDown();
+                };
+                executor.execute(filtering);
+            }
+            else {
                 latch.countDown();
-            };
-            executor.execute(filtering);
+            }
         });
         try {
             latch.await();
-            filtersNotFC.forEach((filter) -> filter.filterPosts());
-            filtersFC.forEach((filter) -> ((FeedChanger)filter).changeFeed());
+            filters.forEach((filter) -> filter.filterPosts());
         }
         catch (InterruptedException e) {
             e.printStackTrace();
         } 
     }
 
+    /**
+    * changes filter to the parameter filter
+    * @param Filters filters
+    */
     public static void changeFilter(Filters filters) {
-        filters.getFiltersFCSave().forEach((filter) -> filtersFC.add(filter));
-        filters.getFiltersNotFCSave().forEach((filter) -> filtersNotFC.add(filter));
+        filters.getFiltersSave().forEach((filter) -> Filters.addFilter(filter));
     }
 
-    public LinkedList<Filter> getFiltersFCSave() {
-        return filtersFCSave;
-    }
 
-    public LinkedList<Filter> getFiltersNotFCSave() {
-        return filtersNotFCSave;
+    /**
+    * @return filterSave, the current filters
+    */
+    public LinkedList<Filter> getFiltersSave() {
+        return filtersSave;
     }
 }

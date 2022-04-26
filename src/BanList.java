@@ -1,24 +1,29 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.util.regex.Pattern;
 
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-
 import java.util.regex.Matcher;
 
+/**
+* Filters out a list of banned words
+* @author Holden Fellenger 
+* @version 1.0
+*/
 public class BanList extends Filter implements Serializable
 {
     private static final long serialVersionUID = 43892023963089865L;
 
     private ArrayList<String> bannedWords = new ArrayList<>();
         
-    public BanList(boolean defaultWords)
+    public BanList(boolean defaultWords, List<String> words)
     {
         if(defaultWords) defaultWords();
+        bannedWords.addAll(words);
+        System.out.println(bannedWords);
     }
 
     /**
@@ -41,13 +46,19 @@ public class BanList extends Filter implements Serializable
     }
 
     @Override
+    /** 
+    *creates a concrete method for filterPosts
+    *
+    */
     public void filterPosts()
     {
         for (Post post : postFeed) {
             ArrayList<String> checkedWords = checkPost(post);  
             if(!checkedWords.isEmpty()) {
-                //mask
-                checkedWords.forEach(badWord -> post.setText((post.getText().replace(badWord, "----"))));
+                checkedWords.forEach(badWord -> {
+                    String asterisks = "*".repeat(badWord.length());
+                    post.setText((post.getText().replace(badWord, asterisks)));
+                });
             }
         }
     }
@@ -60,41 +71,18 @@ public class BanList extends Filter implements Serializable
     public ArrayList<String> checkPost(Post post)
     {
         Pattern pattern;
+        Matcher matcher;
         ArrayList<String> checkedWords = new ArrayList<>();
 
         for (String badWord : bannedWords) {
             pattern = Pattern.compile("(([^A-Za-z])|^)" + badWord + "(([^A-Za-z])|$)");
-            Matcher matcher = pattern.matcher(post.getText());
+            matcher = pattern.matcher(post.getText().toLowerCase());
             while (matcher.find())
             {
-                checkedWords.add(badWord);
+                checkedWords.add(matcher.group().strip());
             } 
         }
+        System.out.println(checkedWords);
         return checkedWords;
     }
-
-    /**
-	 * Collects user-entered words to be censored, adds them to arrayList of strings and displays them in list
-	 * If a word is entered twice, it will be removed from the list and collection of strings
-	 * @param e
-	 * @return
-	 */
-	public void wordsToList(TextField badWordsTxt, ListView<String> badWordLst) {
-		String whiteSpace = "\\s+";
-		Pattern blank = Pattern.compile(whiteSpace);
-		if (badWordsTxt.getText() != "" && !blank.matcher(badWordsTxt.getText()).matches()) {
-			if (bannedWords.contains(badWordsTxt.getText())) {
-				bannedWords.remove(badWordsTxt.getText());
-				badWordLst.getItems().remove(badWordsTxt.getText());
-			}
-			else {
-				bannedWords.add(badWordsTxt.getText());
-				badWordLst.getItems().add(badWordsTxt.getText());
-			}
-		}
-        if (bannedWords.contains(badWordsTxt.getText())) {
-			badWordsTxt.clear();
-		}
-	}
-    
 }

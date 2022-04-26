@@ -3,10 +3,19 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+/**
+* Saves and loads user filter preferences
+* @author Kyle Reed
+* @version 1.0
+*/
 public class FiltersSerialization {
     
     private static String FILE_NAME = "src/";
 
+    /**
+    * Loads user filter preferences
+    * @param filterName, string of filter name
+    */
     public static void deserializeFilters(String filterName) {
         try {
             FileInputStream fileInput = new FileInputStream(FILE_NAME + filterName + ".ser");
@@ -20,6 +29,10 @@ public class FiltersSerialization {
         }
     }
 
+    /**
+    * Saves user filter preferences
+    * @param filterName, string of filter name
+    */
     public static void serializeFilters(String filterName) {
         Filters filters = new Filters();
 

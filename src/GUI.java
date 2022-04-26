@@ -1,17 +1,15 @@
 /**
  * Final project GUI
- * @author Ethan Rienzi
+ * @author Ethan Rienzi, Kyle Reed
  * @version 1.0
  */
 
 import java.io.File;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Pattern;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -22,24 +20,21 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Separator;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 
 
 
 public class GUI extends Application{
-	final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	private static String address;
 
@@ -62,14 +57,17 @@ public class GUI extends Application{
 	private static TextField loadTxt = new TextField();
 	private static TextField saveTxt = new TextField();
 
-	@Override public void start(Stage mainStage) throws InterruptedException {
-		
+	@Override 
+	public void start(Stage mainStage) throws InterruptedException {	
 		BorderPane mainPane = new BorderPane();     // make layout to hold controls
 		setupControls(mainPane, mainStage);  // initialize and place controls
 		Scene scene = new Scene(mainPane);	        // Setup a Splash Screen
 		setStage(mainStage, scene);                 // Finalize and show the stage
 	}
 
+	/**
+	* Creates and places visual objects
+	*/
 	private void setupControls(BorderPane mainPane, Stage mainStage) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.getExtensionFilters().addAll(
@@ -173,11 +171,6 @@ public class GUI extends Application{
 			}
 		});
 
-		maskButton.setOnAction(e -> {
-			apply.setVisible(true);
-			toggleMaskSettings(true);
-		});
-
 		spamButton.setOnAction(e -> {
 			apply.setVisible(true);
 			toggleSpamSettings(true);
@@ -188,12 +181,34 @@ public class GUI extends Application{
 			toggleSortSettings(true);
 		});
 
+		maskButton.setOnAction(e -> {
+			apply.setVisible(true);
+			toggleMaskSettings(true);
+		});
+
+		badWordsTxt.setOnKeyPressed(e -> {
+			if (e.getCode() == KeyCode.ENTER) {
+				String whiteSpace = "\\s+";
+				Pattern blank = Pattern.compile(whiteSpace);
+				if (badWordsTxt.getText() != "" && !blank.matcher(badWordsTxt.getText()).matches()) {
+					ObservableList<String> bannedWords = badWordLst.getItems();
+					if (bannedWords.contains(badWordsTxt.getText())) {
+						bannedWords.remove(badWordsTxt.getText());
+					}
+					else {
+						bannedWords.add(badWordsTxt.getText());
+					}
+				}
+				badWordsTxt.clear();
+			}
+		});
+
 		apply.setOnAction(e -> {
+			createFilter();
 			toggleMaskSettings(false);
 			toggleSpamSettings(false);
 			toggleSortSettings(false);
 			apply.setVisible(false);
-			createFilter();
 		});
 
 		fileSelect.setOnAction(e -> {
@@ -226,7 +241,11 @@ public class GUI extends Application{
 		});
 	}
 
-
+	/**
+	* Changes filter options being displayed based on button passed in
+	* @param button, button of filter being used
+	* @param toggleOn, if current filter is on
+	*/
 	private void toggleFilterSettings(Toggle button, boolean toggleOn) {
 		if (button.equals(maskButton)) {
 			toggleMaskSettings(toggleOn);
@@ -239,26 +258,59 @@ public class GUI extends Application{
 		}
 	}
 
+	/**
+	* Makes mask visual aspects visible
+	* @param toggleOn, if mask filter is toggled on
+	*/
 	private void toggleMaskSettings(boolean toggleOn) {
 		badWordsTxt.setVisible(toggleOn);
         defaultWordsCheck.setVisible(toggleOn);
 		badWordLst.setVisible(toggleOn);
-		if (toggleOn) logger.log(Level.INFO, "MASKING ENABLED");
+		if (toggleOn) {
+			logger.log(Level.INFO, "MASKING ENABLED");
+		}
+		else {
+			badWordsTxt.clear();
+			badWordLst.getItems().clear();
+			defaultWordsCheck.setSelected(false);
+		}
 	}
 
+	/**
+	* Makes spam visual aspects visible
+	* @param toggleOn, if spam filter is toggled on
+	*/
 	private void toggleSpamSettings(boolean toggleOn) {
 		postsCheck.setVisible(toggleOn);
 		usersCheck.setVisible(toggleOn);
-		if (toggleOn) logger.log(Level.INFO, "SPAM FILTER ENABLED");
+		if (toggleOn) {
+			logger.log(Level.INFO, "SPAM FILTER ENABLED");
+		}
+		else {
+			usersCheck.setSelected(false);
+			postsCheck.setSelected(false);
+		}
 	}
 
+	/**
+	* Makes sort visual aspects visible 
+	* @param toggleOn, if filter is toggled on
+	*/
 	private void toggleSortSettings(boolean toggleOn) {
 		sortKeywordTxt.setVisible(toggleOn);
 		keywordLbl.setVisible(toggleOn);
-		if (toggleOn) logger.log(Level.INFO, "SORTING ENABLED");
+		if (toggleOn) {
+			logger.log(Level.INFO, "SORTING ENABLED");
+		}
+		else {
+			sortKeywordTxt.clear();
+		}
 	}
 
 
+	/**
+	* Creates selected filters
+	*/
 	private void createFilter() {
 		Filter filter;
         if (sortButton.isSelected()) {
@@ -266,13 +318,14 @@ public class GUI extends Application{
 			sortButton.setSelected(false);
         }
         else if (maskButton.isSelected()) {
-            filter = new BanList(!defaultWordsCheck.isSelected());
-			((BanList)filter).wordsToList(badWordsTxt, badWordLst);
+            filter = new BanList(!defaultWordsCheck.isSelected(), badWordLst.getItems());
 			maskButton.setSelected(false);
+			toggleMaskSettings(false);
         }
         else {
             filter = new Spam(1, postsCheck.isSelected(), usersCheck.isSelected());
 			spamButton.setSelected(false);
+			toggleSpamSettings(false);
         }
         Filters.addFilter(filter);
 	}
@@ -288,6 +341,10 @@ public class GUI extends Application{
 		stage.show();		
 	}
 
+	/**
+	* Returns file address
+	* @return address or instructions file if no file present
+	*/
 	public static String getAddress() {
 		if (address != null) {
 			return address;

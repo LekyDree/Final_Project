@@ -7,6 +7,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+* Filter that can remove spam posts and spam users
+* @author Kyle Reed
+* @version 1.0
+*/
 public class Spam extends Filter implements FeedChanger, Serializable{
     
     private static final long serialVersionUID = 98024176423187L;
@@ -26,7 +31,18 @@ public class Spam extends Filter implements FeedChanger, Serializable{
         this.deleteSpamUsersEnabled = deleteSpamUsersEnabled;
     }
 
+    /**
+    * Removes spam posts from PostFeed
+    */
     public void filterPosts() {
+        PostFeed.removePosts(postsToRemove);
+    }
+
+    /**
+    * Gets collection of spam posts to be removed from PostFeed
+    */
+    @Override
+    public void determineFeedAlteration() {
         postsWithSameText = new HashMap<>();
         postsWithSameUser = new HashMap<>();
         postsToRemove = new HashSet<>();
@@ -35,6 +51,9 @@ public class Spam extends Filter implements FeedChanger, Serializable{
         if (deleteSpamUsersEnabled) deleteSpamUsers();
     }
 
+    /**
+    * adds the post to postsWithSameUser or postsWithSameText depending on if it has the same user or text as another post
+    */
     private void collectSpam(Post post) {
         String postUser = post.getUserName();
         String postText = post.getText();
@@ -42,6 +61,9 @@ public class Spam extends Filter implements FeedChanger, Serializable{
         goThroughPosts(postText, postsWithSameText.get(postText), post, false);
     }
 
+    /**
+    * Adds post to correct location in given collection
+    */
     private void goThroughPosts(String postInfo, LinkedList<Post> posts, Post post, boolean userPassThrough) {
         if (posts == null) {
             posts = new LinkedList<>();
@@ -50,6 +72,9 @@ public class Spam extends Filter implements FeedChanger, Serializable{
         posts.add(post);        
     }
 
+    /**
+    * deletes posts with flagged text
+    */
     private void deleteSpamText() {
         for (LinkedList<Post> posts : postsWithSameText.values()) {
             if (posts.size() > numRepeatsAllowed) {
@@ -58,6 +83,9 @@ public class Spam extends Filter implements FeedChanger, Serializable{
         }
     }
 
+    /**
+    * deletes posts with flagged users
+    */
     private void deleteSpamUsers() {
         Comparator<List<Post>> higherRepeat = (posts1, posts2) -> posts1.size() - posts2.size();
 
@@ -69,7 +97,5 @@ public class Spam extends Filter implements FeedChanger, Serializable{
         });
     }
 
-    public void changeFeed() {
-        PostFeed.removePosts(postsToRemove);
-    }
+    
 }

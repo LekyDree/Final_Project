@@ -1,8 +1,13 @@
+
+/**
+* A representation of a post that holds its username and text
+* @author Holden Fellenger
+* @version 1.0
+*/
 public class Post
 {
     private String text;
     private String userName;
-    Boolean sorted = false;
 
     /**
      * initialies Post
@@ -15,19 +20,34 @@ public class Post
         this.userName = userName;
     }
 
-
+    /**
+    * returns text
+    * @return String text
+    */
     public String getText() {
         return this.text;
     }
 
+    /**
+    * sets text
+    * @param String text
+    */
     public void setText(String text) {
         this.text = text;
     }
 
+    /**
+    * returns userName
+    * @return String userName
+    */
     public String getUserName() {
         return this.userName;
     }
 
+    /**
+    * sets userName
+    * @param String userName
+    */
     public void setUserName(String userName) {
         this.userName = userName;
     }

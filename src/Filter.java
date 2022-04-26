@@ -1,9 +1,9 @@
 import java.util.List;
 
 /**
- * Author       Alex Tapiero
- * Version      1
- * Group        1
+ * Superclass for all filter objects
+ * @author       Alex Tapiero
+ * @version      1
  */
     abstract public class Filter {
 
